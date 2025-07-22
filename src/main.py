@@ -37,7 +37,7 @@ async def on_ready():
     
     await log_voice_members()
     # await bot.tree.sync()
-    # await bot.tree.sync(guild=discord.Object(guild_id))
+    await bot.tree.sync(guild=discord.Object(guild_id))
 
 # Event handler for when a message is sent
 @bot.event
@@ -62,5 +62,22 @@ async def hello(ctx):
 @bot.command()
 async def testing(ctx):
     await ctx.send("Testing")
+
+@bot.command()
+async def connect(ctx):
+    channel = bot.get_channel(channel_id)
+    if channel:
+        await channel.connect()
+    else:
+        print(f"Channel with ID {channel_id} not found or inaccessible.")
+
+@bot.command()
+async def leave(ctx):
+    channel = bot.get_channel(channel_id)
+    if channel:
+        await channel.leave()
+    else:
+        print(f"Channel with ID {channel_id} not found or inaccessible.")
+
 # Run the bot with your token
 bot.run(bot_token)

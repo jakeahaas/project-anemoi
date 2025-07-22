@@ -1,0 +1,63 @@
+import discord
+from discord.ext import commands
+from dotenv import load_dotenv
+import os
+import time
+
+load_dotenv() # Load variables from .env
+
+bot_token = os.getenv("BOT_TOKEN")
+guild_id = os.getenv("GUILD_ID")
+channel_id = os.getenv("CHANNEL_ID")
+
+# Define intents (specify what events your bot needs to listen to)
+intents = discord.Intents.default()
+intents.message_content = True  # Enable if your bot needs to read message content
+intents.members = True # Enable the members intent
+
+# Create a bot instance with a command prefix and intents
+bot = commands.Bot(command_prefix='/', intents=intents)
+
+# Get voice channel object
+voice_channel = bot.get_channel(channel_id)
+
+# Event handler for when the bot is ready
+@bot.event
+async def on_ready():
+    print(f'Logged in as {bot.user}!')
+    print('------')
+    # await bot.tree.sync()
+    # await bot.tree.sync(guild=discord.Object(guild_id))
+    # for intent in intents:
+    #     print(intent)
+    while True:
+        for member in voice_channel.members:
+            print(member.name)
+        time.sleep(60)
+
+# Event handler for when a message is sent
+@bot.event
+async def on_message(message):
+    # Runs commands before acting on message if there are any
+    await bot.process_commands(message)
+    # Ignores messages from the bot to prevent an infinite loop
+    if message.author != bot.user:
+        # Get the message content
+        message_content = message.content
+        print(f"Receied message: {message_content}")
+        # Do something with the message content
+        if "hell yeah" in message_content.lower():
+            await message.channel.send("Hell Yeah!")
+    
+
+# A simple command
+@bot.command()
+async def hello(ctx):
+    await ctx.send(f"Hello {ctx.author.display_name}!")
+    await ctx.send(f"You sent: {ctx.message.content}!")
+
+@bot.command()
+async def testing(ctx):
+    await ctx.send("Testing")
+# Run the bot with your token
+bot.run(bot_token)

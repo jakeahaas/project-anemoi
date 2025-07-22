@@ -18,22 +18,26 @@ intents.members = True # Enable the members intent
 # Create a bot instance with a command prefix and intents
 bot = commands.Bot(command_prefix='/', intents=intents)
 
-# Get voice channel object
-voice_channel = bot.get_channel(channel_id)
+async def log_voice_members():
+    # Get voice channel object
+    await bot.fetch_channel(channel_id)
+    voice_channel = bot.get_channel(channel_id)
+
+    # Log once per minute
+    while True:
+        for member in voice_channel.members:
+            print(f"Members: {member.name}")
+        time.sleep(60)
 
 # Event handler for when the bot is ready
 @bot.event
 async def on_ready():
     print(f'Logged in as {bot.user}!')
     print('------')
+    
+    await log_voice_members()
     # await bot.tree.sync()
     # await bot.tree.sync(guild=discord.Object(guild_id))
-    # for intent in intents:
-    #     print(intent)
-    while True:
-        for member in voice_channel.members:
-            print(member.name)
-        time.sleep(60)
 
 # Event handler for when a message is sent
 @bot.event
@@ -48,7 +52,6 @@ async def on_message(message):
         # Do something with the message content
         if "hell yeah" in message_content.lower():
             await message.channel.send("Hell Yeah!")
-    
 
 # A simple command
 @bot.command()

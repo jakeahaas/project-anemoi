@@ -3,12 +3,13 @@ from discord.ext import commands
 from dotenv import load_dotenv
 import os
 import time
+import threading
 
 load_dotenv() # Load variables from .env
 
 bot_token = os.getenv("BOT_TOKEN")
-guild_id = os.getenv("GUILD_ID")
-channel_id = os.getenv("CHANNEL_ID")
+guild_id = int(os.getenv("GUILD_ID"))
+channel_id = int(os.getenv("CHANNEL_ID"))
 
 # Define intents (specify what events your bot needs to listen to)
 intents = discord.Intents.default()
@@ -22,11 +23,12 @@ async def log_voice_members():
     # Get voice channel object
     await bot.fetch_channel(channel_id)
     voice_channel = bot.get_channel(channel_id)
-
+    print(voice_channel)
     # Log once per minute
     while True:
-        for member in voice_channel.members:
-            print(f"Members: {member.name}")
+        if voice_channel:
+            for member in voice_channel.members:
+                print(f"Members: {member.name}")
         time.sleep(60)
 
 # Event handler for when the bot is ready
@@ -34,10 +36,12 @@ async def log_voice_members():
 async def on_ready():
     print(f'Logged in as {bot.user}!')
     print('------')
-    
-    await log_voice_members()
+
     # await bot.tree.sync()
     await bot.tree.sync(guild=discord.Object(guild_id))
+
+    t1 = threading.Thread(await log_voice_members(), None)
+    t1.start()
 
 # Event handler for when a message is sent
 @bot.event
@@ -63,21 +67,24 @@ async def hello(ctx):
 async def testing(ctx):
     await ctx.send("Testing")
 
-@bot.command()
-async def connect(ctx):
-    channel = bot.get_channel(channel_id)
-    if channel:
-        await channel.connect()
-    else:
-        print(f"Channel with ID {channel_id} not found or inaccessible.")
 
-@bot.command()
-async def leave(ctx):
-    channel = bot.get_channel(channel_id)
-    if channel:
-        await channel.leave()
-    else:
-        print(f"Channel with ID {channel_id} not found or inaccessible.")
+# NEEDS A LIBRARY FOR THIS TO WORK
+#------------------------------------------------
+# @bot.command()
+# async def connect(ctx):
+#     channel = bot.get_channel(channel_id)
+#     if channel:
+#         await channel.connect()
+#     else:
+#         print(f"Channel with ID {channel_id} not found or inaccessible.")
 
+# @bot.command()
+# async def leave(ctx):
+#     channel = bot.get_channel(channel_id)
+#     if channel:
+#         await channel.leave()
+#     else:
+#         print(f"Channel with ID {channel_id} not found or inaccessible.")
+#------------------------------------------------
 # Run the bot with your token
 bot.run(bot_token)
